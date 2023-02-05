@@ -1,0 +1,45 @@
+#! /usr/bin/env sh
+
+if [ -z "${SEASHELL_HOME}" ] || [ ! -d "${SEASHELL_HOME}" ] || [ ! -f "${SEASHELL_HOME}/seashell-init" ]; then
+    echo "Install Seashell 2 first, please!"
+    exit;
+fi
+
+if [ -z "$SEASHELLIST_INIT" ]; then
+    if [ -n "$MY_SHELL" ]; then
+        SEASHELLIST_INIT=1 exec $MY_SHELL "$0" "$@"
+    elif [ -n "$ZSH_VERSION" ] || [ -n "`which zsh`" ]; then
+        SEASHELLIST_INIT=1 exec zsh "$0" "$@"
+    elif [ -n "$BASH_VERSION" ] || [ -n "`which bash`" ]; then
+        SEASHELLIST_INIT=1 exec bash "$0" "$@"
+    else
+        exit
+    fi
+fi
+
+source "${SEASHELL_HOME}/seashell-init"
+
+Seashell.Helper.archive
+
+while [ $# -gt 0 ]; do
+    case $1 in
+        -d|--debug)
+            Seashell.Helper.turn_on_debug
+            shift
+            ;;
+        -*)
+            Seashell.System.exit "No valid argument!"
+            ;;
+        *)
+            #script_file="${1%%-*}"
+            script_file="$1"
+            shift
+            ;;
+    esac
+done
+
+if [ -n "$script_file" ] && [ -f "$script_file" ]; then
+    $SEASHELL_CURRENT_SHELL "$script_file"
+else
+    Seashell.System.exit "No valid script!"
+fi

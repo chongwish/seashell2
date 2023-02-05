@@ -1,0 +1,8 @@
+#! /usr/bin/env sh
+
+if [ $# -eq 0]; then
+    : export PS1="(Seashell) $PS1"
+else
+    : $SHELL
+fi
+

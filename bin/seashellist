@@ -1,0 +1,87 @@
+#! /usr/bin/env sh
+
+if [ -z "${SEASHELL_HOME}" ] || [ ! -d "${SEASHELL_HOME}" ] || [ ! -f "${SEASHELL_HOME}/seashell-init" ]; then
+    echo "Install Seashell 2 first, please!"
+    exit;
+fi
+
+if [ -z "$SEASHELLIST_INIT" ]; then
+    if [ -n "$ZSH_VERSION" ] || [ -n "`which zsh`" ]; then
+        SEASHELLIST_INIT=1 exec zsh "$0" "$@"
+    elif [ -n "$BASH_VERSION" ] || [ -n "`which bash`" ]; then
+        SEASHELLIST_INIT=1 exec bash "$0" "$@"
+    else
+        exit
+    fi
+fi
+
+source "${SEASHELL_HOME}/seashell-init"
+
+is_module_given=false
+is_namespace_given=false
+is_script_given=false
+is_vendor_given=false
+
+show_helper() {
+    local message="\
+Usage: seashellist [option argument]
+Options:
+       -m module_name
+       -n namespace_name
+       -s script_name
+       -v vendor_name
+"
+    cat <<< $message
+    exit 0
+}
+
+if [ $# -eq 0 ]; then
+    show_helper
+fi
+
+while [ $# -gt 0 ]; do
+    case $1 in
+        -m|--module)
+            shift
+            is_module_given=true
+            module_name="$1"
+            [ -z "$module_name" ] && show_helper
+            shift
+            ;;
+        -n|--namespace)
+            shift
+            is_namespace_given=true
+            namespace_name="$1"
+            [ -z "$namespace_name" ] && show_helper
+            shift
+            ;;
+        -s|--script)
+            shift
+            is_script_given=true
+            script_name="$1"
+            [ -z "$script_name" ] && show_helper
+            shift
+            ;;
+        -v|--vendor)
+            shift
+            is_vendor_given=true
+            vendor_name="$1"
+            [ -z "$vendor_name" ] && show_helper
+            shift
+            ;;
+        *)
+            show_helper
+    esac
+done
+
+if $is_module_given; then
+    Seashell.Helper.create_module "$module_name"
+fi
+
+if $is_namespace_given; then
+    Seashell.Helper.create_namespace "$namespace_name"
+fi
+
+if $is_script_given; then
+    Seashell.Helper.create_script "$script_name"
+fi
