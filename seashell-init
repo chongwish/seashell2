@@ -1,0 +1,49 @@
+######################
+# Seashell bootstrap #
+######################
+
+# ------------------------------------------------------------
+# Define the environment variable before Seashell is loaded
+# ------------------------------------------------------------
+# - SEASHELL_CURRENT_SHELL: zsh or bash
+# - SEASHELL_HOME: path of Seashell
+# - SEASHELL_INIT_FILE: path of seashell-init
+# - SEASHELL_CURRENT_SCRIPT: path of the running script
+# ------------------------------------------------------------
+
+export SEASHELL_CURRENT_SHELL=`if [ -n "$ZSH_VERSION" ]; then echo zsh; elif [ -n "$BASH_VERSION" ]; then echo bash; else exit 1; fi`
+export SEASHELL_HOME="$(cd "$(dirname "${BASH_SOURCE:-${0:a}}")" 2>&1 && pwd -P)"
+export SEASHELL_INIT_FILE="$SEASHELL_HOME/seashell-init"
+export SEASHELL_CURRENT_SCRIPT
+
+
+# ------------------------------------------------------------
+# Shell settings
+# ------------------------------------------------------------
+
+if [[ "$SEASHELL_CURRENT_SHELL" == "zsh" ]]; then
+    setopt sh_word_split
+    zmodload zsh/parameter
+    SEASHELL_CURRENT_SCRIPT="${funcfiletrace[$#funcfiletrace]%:*}"
+    # setopt no_bad_pattern && setopt sh_word_split && setopt noglob
+else
+    shopt -s expand_aliases
+    SEASHELL_CURRENT_SCRIPT="${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}"
+fi
+
+set -e
+set -o pipefail
+
+
+# ------------------------------------------------------------
+# Load Seashell core
+# ------------------------------------------------------------
+
+for i in `ls "$SEASHELL_HOME"/src/Seashell`; do source "$SEASHELL_HOME/src/Seashell/$i"; done
+
+
+# ------------------------------------------------------------
+# Repair
+# ------------------------------------------------------------
+
+SEASHELL_CURRENT_SCRIPT="`Seashell.File.get_absolute_path "$SEASHELL_CURRENT_SCRIPT"`"
